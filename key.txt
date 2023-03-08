@@ -1,0 +1,16 @@
+from django.conf import settings
+from djfernet import Fernet
+import os
+
+# Read encryption key from file
+with open(os.path.join(settings.BASE_DIR, 'key.txt'), 'rb') as f:
+    key = f.read()
+
+# Initialize Fernet object with encryption key
+fernet = Fernet(key)
+
+# Encrypt data
+encrypted_data = fernet.encrypt(b'some data')
+
+# Decrypt data
+decrypted_data = fernet.decrypt(encrypted_data)

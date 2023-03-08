@@ -1,0 +1,6 @@
+I modified the Card model to encrypt the data field.
+The EncryptedBinaryField will automatically encrypt and decrypt the data field when it is read from or written to the database.
+To manage keys, wI created a key.txt file in the project directory and stored the encryption key in it. The key is a random string of 32 bytes (256 bits), generated using a secure random number generator. Then we can read the key from the file and use it to encrypt and decrypt data
+One problem I encountered when encrypting the data field was that the logic used in the use_card_view to find a card in the database that matches what the user uploaded no longer worked after encrypting the card data.
+This is because the encrypted data is different every time it is encrypted, even if the original data is the same. 
+To fix this, I modified the use_card_view to first decrypt the data field of all cards in the database, and then compare the decrypted data to the uploaded data. This ensures that we can find the correct card even after encrypting the data field

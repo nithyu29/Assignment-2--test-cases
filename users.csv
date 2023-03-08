@@ -1,0 +1,4 @@
+username,email,password,first_name,last_name,is_staff,is_superuser
+johndoe,johndoe@example.com,password123,John,Doe,False,False
+janedoe,janedoe@example.com,secret321,Jane,Doe,True,False
+bobsmith,bobsmith@example.com,mysecretpassword,Bob,Smith,True,False
