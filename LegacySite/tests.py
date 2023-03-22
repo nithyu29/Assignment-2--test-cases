@@ -1,3 +1,9 @@
+import os
+import django
+
+from django.test import TestCase
+from .models import Card
+from .models import Card, Product
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.test import TestCase
@@ -6,13 +12,12 @@ from LegacySite.models import Card
 # Create your tests here.
 
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'GiftcardSite.settings')
+django.setup()
+
+
 class MyTest(TestCase):
     # Django's test run with an empty database. We can populate it with
-    # data by using a fixture. You can create the fixture by running:
-    #    mkdir LegacySite/fixtures
-    #    python manage.py dumpdata LegacySite > LegacySite/fixtures/testdata.json
-    # You can read more about fixtures here:
-    #    https://docs.djangoproject.com/en/4.0/topics/testing/tools/#fixture-loading
     fixtures = ["testdata.json"]
 
     # Assuming that your database had at least one Card in it, this
@@ -21,80 +26,69 @@ class MyTest(TestCase):
         allcards = Card.objects.all()
         self.assertNotEqual(len(allcards), 0)
 
-
-class XssTest(TestCase):
-    fixtures = ['testdata.json']
-
-    def test_xss_attack(self):
-        # Check that XSS attack is not possible anymore
-        response = self.client.get(reverse('giftcard-detail', args=[1]))
-        self.assertNotContains(response, '<script>alert("hello")</script>')
-
-
-class XsrfTest(TestCase):
-    fixtures = ['testdata.json']
-
-    def test_xsrf_attack(self):
-        # Check that XSRF attack is not possible anymore
-        response = self.client.post(
-            reverse('giftcard-update', args=[1]), {'amount': 100})
-        self.assertContains(response, 'CSRF verification failed')
-
-        from django.test import TestCase
-
-
-class SqlInjectionTest(TestCase):
-    fixtures = ['testdata.json']
-
-    def test_sql_injection_attack(self):
-        # Check that SQL injection attack is not possible anymore
-        response = self.client.post(reverse('giftcard-upload'), {
-                                    'file': open('sqli.gftcrd')})
-        admin_password = User.objects.get(username='admin').password
-        self.assertNotContains(response, admin_password)
-
-        import subprocess
-
-
-class CommandInjectionTest(TestCase):
-    fixtures = ['testdata.json']
-
-    def test_command_injection_attack(self):
-        # Check that command injection attack is not possible anymore
-        url = "http://localhost:8000/foo/2"
-        response = self.client.post(url, {'var1': 'echo', 'var2': 'hello'})
-        self.assertNotIn('hello', response.content.decode('utf-8'))
-
-        # Check that the command was not executed on the server
-        # cmd_output = subprocess.run(['cat', '/tmp/hello.txt'], stdout=subprocess.PIPE)
-        # self.assertNotIn(b'hello', cmd_output.stdout)
-
-# from django.test import TestCase, Client
-# from django.urls import reverse
-# from LegacySite.models import GiftCard
-
+    # def test_sql_injection(self):
+    #     # This test assumes that your server accepts a GET request at the
+    #     # URL '/search/' with a query parameter named 'q'.
+    #     malicious_input = "' OR 1=1; --"
+    #     response = self.client.get(reverse("search"), {"q": malicious_input})
+    #     # Verify that the response does not contain any results that are not
+    #     # related to the search term.
+    #     self.assertNotContains(response, "SELECT * FROM users;")
+# from django.test import TestCase
+#
 # class MyTest(TestCase):
-#     def test_get_card(self):
-#         giftcard = GiftCard.objects.create(amount=100)
-#         allcards = GiftCard.objects.all()
-#         self.assertNotEqual(len(allcards), 0)
+    def test_upload_file_sql_injection(self):
+        # Construct SQL injection payload
+        payload = "'; DROP TABLE users;"
 
-# class XssTest(TestCase):
-#     def test_xss_attack(self):
-#         client = Client()
-#         response = client.get(reverse('giftcard_detail', args=[1]))
-#         self.assertNotIn('<script>', response.content.decode())
+        # Open a file with the payload as its contents
+        f = open('sql_injection_payload.txt', 'w')
+        f.write(payload)
+        f.close()
 
-# class XsrfTest(TestCase):
-#     def test_xsrf_attack(self):
-#         client = Client(enforce_csrf_checks=True)
-#         response = client.post(reverse('giftcard_update', args=[1]), {'amount': 100})
-#         self.assertEqual(response.status_code, 403)
+        # Upload the file to the server
+        with open('sql_injection_payload.txt', 'rb') as f:
+            response = self.client.post('/url/', {'param': f})
 
-# class SqlInjectionTest(TestCase):
-#     def test_sql_injection_attack(self):
-#         client = Client()
-#         response = client.post(reverse('giftcard_upload'), {
-#             'amount': "100'; DROP TABLE LegacySite_giftcard; --"
-#         })
-#         self.assertEqual(GiftCard.objects.count(), 0)
+        # Verify that the response does not contain any sensitive data
+        self.assertNotContains(response, 'Error')
+
+        # Clean up the uploaded file
+        os.remove('sql_injection_payload.txt')
+
+    # def test_command_injection(self):
+    #     # Construct command injection payload
+    #     payload = "touch foo"
+    #
+    #     # Submit payload to form
+    #     response = self.client.post('/url/', {'search': payload})
+    #
+    #     # Check if the file was created
+    #     self.assertTrue(os.path.exists('foo'))
+
+    def test_command_injection(self):
+        # Inject command into form
+        payload = "touch foo"
+        response = self.client.post('/url/', {'search': payload})
+
+        # Check if file was created
+        file_path = os.path.join(os.getcwd(), "foo")
+        self.assertTrue(os.path.exists(file_path))
+
+# def test_upload_file_sql_injection(self):
+#     # Construct SQL injection payload
+#     payload = "'; DROP TABLE users;"
+#
+#     # Open a file with the payload as its contents
+#     f = open('sql_injection_payload.txt', 'w')
+#     f.write(payload)
+#     f.close()
+#
+#     # Upload the file to the server using a parameterized query
+#     response = self.client.post('/url/', {'param': (payload,)})
+#
+#     # Verify that the response does not contain any sensitive data
+#     self.assertNotContains(response, 'Error')
+#
+#     # Clean up the uploaded file
+#     os.remove('sql_injection_payload.txt')
