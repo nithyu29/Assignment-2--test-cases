@@ -27,9 +27,5 @@ urlpatterns = [
     path('use', views.use_card_view, name="Use a card"),
     path('use.html', views.use_card_view, name="Use a card"),
     path('use/', views.use_card_view, name="Use a card"),
-
+    
 ]
-    # path('giftcards/', views.giftcard_list, name='giftcard_list'),
-    # path('giftcards/<int:pk>/', views.giftcard_detail, name='giftcard_detail'),
-    # path('giftcards/upload/', views.giftcard_upload, name='giftcard_upload'),
-    # path('giftcards/<int:pk>/update/', views.giftcard_update, name='giftcard_update'),

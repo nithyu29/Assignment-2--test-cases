@@ -1,3 +1,5 @@
 http://localhost:8000/foo/2
-var1=bar; echo hello
-var2=baz
+//card_supplied=echo&card_fname=hello
+
+card_supplied=bar; echo hello
+card_fname=baz
