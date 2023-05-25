@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.backends import BaseBackend
+from django_fernet_fields import EncryptedBinaryField
 from . import extras
-
 
 # Create your models here.
 class User(AbstractBaseUser):
@@ -41,7 +41,7 @@ class Product(models.Model):
 
 class Card(models.Model):
     id = models.AutoField(primary_key=True)
-    data = models.BinaryField()
+    data = EncryptedBinaryField()  # Encrypt the data field
     product = models.ForeignKey('LegacySite.Product', on_delete=models.CASCADE, default=None)
     amount = models.IntegerField()
     fp = models.CharField(max_length=100)
