@@ -27,5 +27,8 @@ urlpatterns = [
     path('use', views.use_card_view, name="Use a card"),
     path('use.html', views.use_card_view, name="Use a card"),
     path('use/', views.use_card_view, name="Use a card"),
+    path('search/', views.search_view, name="search"),  # Add this line. Replace `views.search_view` with the actual view function that should handle the search route.
+    path('upload-file/', views.upload_file, name='upload_file'),
+
     
 ]

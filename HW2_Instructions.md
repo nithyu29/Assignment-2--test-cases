@@ -45,6 +45,10 @@ python manage.py makemigrations LegacySite
 python manage.py migrate
 bash import_dbs.sh
 ```
+data,product_id,amount,fp,user_id,used
+YWJjMTIzNDU2Nzg5MDExMQ,300,10,abcde12345,1,False
+ZXhhbXBsZTEyMzQ1Njc4OTAxMg,89,5,fghij67890,2,True
+YW55IGNhcm5hbCBwbGVhc3VyZS4,200,8,klmno12345,1,False
 
 Read through the `models.py` and `views.py` files (and the helper
 functions in `extras.py`) in the LegacySite folder to get a feel 

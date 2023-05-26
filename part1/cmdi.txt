@@ -1,0 +1,5 @@
+http://localhost:8000/foo/2
+//card_supplied=echo&card_fname=hello
+
+card_supplied=bar; echo hello
+card_fname=baz

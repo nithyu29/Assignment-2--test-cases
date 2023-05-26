@@ -1,11 +1,9 @@
 import json
-import os
-import sys
 from binascii import hexlify
 from hashlib import sha256
-from os import urandom, system
-
 from django.conf import settings
+from os import urandom, system
+import sys, os
 
 SEED = settings.RANDOM_SEED
 
@@ -20,47 +18,43 @@ elif sys.platform == 'darwin':
 else:
     raise Exception("Unsupported platform: {}".format(sys.platform))
 
-
 # KG: Something seems fishy here. Why are we seeding here?
 def generate_salt(length, debug=True):
     import random
     random.seed(SEED)
-    return hexlify(random.randint(0, 2 ** length - 1).to_bytes(length, byteorder='big'))
-
+    return hexlify(random.randint(0, 2**length-1).to_bytes(length, byteorder='big'))
 
 def hash_pword(salt, pword):
-    assert (salt is not None and pword is not None)
+    assert(salt is not None and pword is not None)
     hasher = sha256()
     hasher.update(salt)
     hasher.update(pword.encode('utf-8'))
     return hasher.hexdigest()
 
-
 def parse_salt_and_password(user):
     return user.password.split('$')
 
-
-def check_password(user, password):
+def check_password(user, password): 
     salt, password_record = parse_salt_and_password(user)
     verify = hash_pword(salt.encode('utf-8'), password)
     if verify == password_record:
         return True
     return False
 
-
 def get_fake_signature(card_file_data):
     return urandom(16).hex()
 
-
 def write_card_data(card_file_path, product, price, customer):
-    data_dict = {'merchant_id': product.product_name, 'customer_id': customer.username, 'total_value': price}
-    record = {'record_type': 'amount_change', "amount_added": 2000, }
+    data_dict = {}
+    data_dict['merchant_id'] = product.product_name
+    data_dict['customer_id'] = customer.username
+    data_dict['total_value'] = price
+    record = {'record_type':'amount_change', "amount_added":2000,}
     # TODO: replace this with a real signature
     record['signature'] = get_fake_signature(json.dumps(record))
-    data_dict['records'] = [record, ]
+    data_dict['records'] = [record,]
     with open(card_file_path, 'w') as card_file:
         card_file.write(json.dumps(data_dict))
-
 
 def parse_card_data(card_file_data, card_path_name):
     print(card_file_data)
